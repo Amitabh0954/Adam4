@@ -1,33 +1,36 @@
-"""
-Application entry point.
-"""
-
-import logging
+import os
 from flask import Flask
-from app.routes.user_routes import user_blueprint
-from app.services.user_service import UserService
-from app.config.config import Config
+from app.config import Config
+from app.routes import init_routes
 
-class App:
-    def __init__(self) -> None:
-        self.app = Flask(__name__)
-        self.configure_app()
-        self.register_blueprints()
-        self.init_services()
 
-    def configure_app(self) -> None:
-        self.app.config.from_object(Config)
-        logging.basicConfig(level=logging.DEBUG)
+def create_app() -> Flask:
+    """Create and configure the app"""
+    app = Flask(__name__)
+    app.config.from_object(Config)
 
-    def register_blueprints(self) -> None:
-        self.app.register_blueprint(user_blueprint)
+    # Initialize routes
+    init_routes(app)
 
-    def init_services(self) -> None:
-        self.user_service = UserService()
+    # Setup logging
+    if not app.debug or os.getenv("FLASK_DEBUG") == "0":
+        import logging
+        from logging.handlers import RotatingFileHandler
 
-    def run(self) -> None:
-        self.app.run(host='0.0.0.0', port=5000)
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
+        file_handler = RotatingFileHandler('logs/app.log', maxBytes=10240, backupCount=10)
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+
+        app.logger.setLevel(logging.INFO)
+        app.logger.info('App startup')
+
+    return app
+
 
 if __name__ == '__main__':
-    app_instance = App()
-    app_instance.run()
+    app = create_app()
+    app.run(host='0.0.0.0', port=int(os.getenv('PORT', 5000)))
