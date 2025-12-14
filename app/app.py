@@ -1,17 +1,16 @@
 import os
 from flask import Flask
 from app.config import Config
-from app.routes import init_routes
+from app.routes import register_blueprints
 from app.repositories.database import db
 
 
 def create_app() -> Flask:
-    """Create and configure the Flask application."""
     app = Flask(__name__)
     app.config.from_object(Config)
 
     db.init_app(app)
-    init_routes(app)
+    register_blueprints(app)
 
     return app
 
