@@ -1,5 +1,3 @@
 """
-Initialize models
+Initialization module for models.
 """
-
-# Placeholder for models initialization logic
