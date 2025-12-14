@@ -1,5 +1,2 @@
-"""
-Initialize repositories
-"""
-
-# Placeholder for repositories initialization logic
+# __init__.py
+"""Repositories module initialization."""
