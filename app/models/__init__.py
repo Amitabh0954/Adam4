@@ -1,3 +1,2 @@
-"""
-Initialization module for models.
-"""
+# __init__.py
+"""Models module initialization."""
