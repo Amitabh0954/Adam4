@@ -1,7 +1,6 @@
 from flask import Flask
-from app.routes.profile import profile_bp
-
+from app.routes.product import product_bp
 
 def init_routes(app: Flask) -> None:
     """Register all routes with the Flask app."""
-    app.register_blueprint(profile_bp)
+    app.register_blueprint(product_bp)

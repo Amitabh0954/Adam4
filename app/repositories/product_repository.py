@@ -2,18 +2,9 @@ from app.models.product import Product
 from app.repositories.database import db
 
 class ProductRepository:
-    def search_query(self, query: str, page: int, per_page: int) -> list[Product]:
-        return Product.query.filter(
-            (Product.name.ilike(f'%{query}%')) |
-            (Product.description.ilike(f'%{query}%')) |
-            (Product.category.ilike(f'%{query}%')) |
-            (Product.attributes['attributes'].astext.ilike(f'%{query}%'))
-        ).paginate(page, per_page, error_out=False).items
+    def get_product_by_id(self, product_id: int) -> Product:
+        return Product.query.filter_by(id=product_id, is_deleted=False).first()
 
-    def count_query_results(self, query: str) -> int:
-        return Product.query.filter(
-            (Product.name.ilike(f'%{query}%')) |
-            (Product.description.ilike(f'%{query}%')) |
-            (Product.category.ilike(f'%{query}%')) |
-            (Product.attributes['attributes'].astext.ilike(f'%{query}%'))
-        ).count()
+    def delete(self, product: Product) -> None:
+        product.is_deleted = True
+        db.session.commit()
