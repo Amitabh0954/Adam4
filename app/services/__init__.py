@@ -1,2 +1,3 @@
-# __init__.py
-"""Services module initialization."""
+"""
+Initialization module for services.
+"""
