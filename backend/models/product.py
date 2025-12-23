@@ -5,10 +5,12 @@ class Product:
     name: str
     price: float
     description: str
+    category: str = ""
 
     def to_dict(self) -> dict:
         return {
             "name": self.name,
             "price": self.price,
-            "description": self.description
+            "description": self.description,
+            "category": self.category
         }
