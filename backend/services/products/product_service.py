@@ -15,3 +15,6 @@ class ProductService:
 
     def get_all_products(self) -> list:
         return self.product_repository.get_all_products()
+
+    def update_product(self, name: str, price: Optional[float], description: Optional[str]) -> Optional[Product]:
+        return self.product_repository.update_product(name, price, description)
