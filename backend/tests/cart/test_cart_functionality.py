@@ -98,3 +98,58 @@ def test_update_cart_quantity_guest(client):
     assert response.status_code == 200
     with client.session_transaction() as session:
         assert session['cart']["product123"] == 3
+        
+def test_save_cart_state(client):
+    with client.session_transaction() as session:
+        session['logged_in'] = True
+        session['user_id'] = "user123"
+
+    client.post('/cart/add', json={
+        "product_id": "product123",
+        "quantity": 2
+    })
+    client.post('/cart/add', json={
+        "product_id": "product456",
+        "quantity": 1
+    })
+
+    response = client.get('/cart/view')
+    assert response.status_code == 200
+    cart = response.get_json()
+    assert cart["items"]["product123"] == 2
+    assert cart["items"]["product456"] == 1
+    assert "total" in cart
+
+def test_retrieve_saved_cart(client):
+    with client.session_transaction() as session:
+        session['logged_in'] = True
+        session['user_id'] = "user123"
+
+    client.post('/cart/add', json={
+        "product_id": "product123",
+        "quantity": 2
+    })
+    client.post('/cart/add', json={
+        "product_id": "product456",
+        "quantity": 1
+    })
+
+    response = client.get('/cart/view')
+    assert response.status_code == 200
+    cart = response.get_json()
+    assert cart["items"]["product123"] == 2
+    assert cart["items"]["product456"] == 1
+
+    # Simulate user logging out and logging back in
+    with client.session_transaction() as session:
+        session.clear()
+
+    with client.session_transaction() as session:
+        session['logged_in'] = True
+        session['user_id'] = "user123"
+
+    response = client.get('/cart/view')
+    assert response.status_code == 200
+    cart = response.get_json()
+    assert cart["items"]["product123"] == 2
+    assert cart["items"]["product456"] == 1
