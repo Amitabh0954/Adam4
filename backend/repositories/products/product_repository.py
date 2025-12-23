@@ -19,3 +19,6 @@ class ProductRepository:
             if product.name == name:
                 return product
         return None
+
+    def delete_product(self, name: str) -> None:
+        self.products = [product for product in self.products if product.name != name]
