@@ -47,3 +47,16 @@ def test_delete_product(product_service):
 
 def test_delete_non_existent_product(product_service):
     assert product_service.delete_product("Non Existent Product") is False
+
+def test_search_products(product_service):
+    product_service.add_product("Test Product 1", 10.99, "First test product", "Category A")
+    product_service.add_product("Test Product 2", 15.99, "Second test product", "Category B")
+    
+    search_results = product_service.search_products("Category", 1, 1)
+    assert search_results["total"] == 2
+    assert len(search_results["products"]) == 1
+    assert search_results["products"][0]["name"] == "Test Product 1"
+
+    search_results = product_service.search_products("Second", 1, 10)
+    assert search_results["total"] == 1
+    assert search_results["products"][0]["name"] == "Test Product 2"
