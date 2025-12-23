@@ -1,5 +1,6 @@
 from backend.models.cart import Cart
 from backend.repositories.cart_repository import CartRepository
+from backend.services.products.product_service import ProductService
 from uuid import uuid4
 
 class CartService:
@@ -28,10 +29,18 @@ class CartService:
             if persist:
                 self.cart_repository.save_cart(cart_id, cart)
     
+    def update_product_quantity(self, cart_id: str, product_id: str, quantity: int, persist: bool):
+        cart = self.cart_repository.get_cart_by_id(cart_id)
+        if cart:
+            cart.update_quantity(product_id, quantity)
+            if persist:
+                self.cart_repository.save_cart(cart_id, cart)
+
     def calculate_total(self, cart: dict) -> float:
         total_price = 0.0
+        product_service = ProductService()
         for product_id, quantity in cart.get('items', {}).items():
-            product = ProductService().get_product_by_id(product_id)
+            product = product_service.get_product_by_id(product_id)
             if product:
                 total_price += product.price * quantity
         return total_price
