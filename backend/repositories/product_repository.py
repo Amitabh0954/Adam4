@@ -17,13 +17,15 @@ class ProductRepository:
     def get_all_products(self) -> List[Product]:
         return self.products
 
-    def update_product(self, name: str, price: Optional[float], description: Optional[str]) -> Optional[Product]:
+    def update_product(self, name: str, price: Optional[float], description: Optional[str], category_names: list) -> Optional[Product]:
         product = self.get_product_by_name(name)
         if product is not None:
             if price is not None:
                 product.price = price
             if description is not None:
                 product.description = description
+            if category_names is not None:
+                product.categories = category_names
         return product
 
     def delete_product(self, name: str) -> bool:
@@ -38,7 +40,7 @@ class ProductRepository:
             product for product in self.products
             if query.lower() in product.name.lower() or 
                query.lower() in product.description.lower() or 
-               query.lower() in product.category.lower()
+               any(query.lower() in category.lower() for category in product.categories)
         ]
         total = len(filtered_products)
         start = (page - 1) * per_page
