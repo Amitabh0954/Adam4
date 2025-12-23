@@ -44,3 +44,11 @@ class CartService:
             if product:
                 total_price += product.price * quantity
         return total_price
+
+    def save_user_cart(self, user_id: str, cart: dict) -> None:
+        cart_obj = Cart(items=cart['items'])
+        self.cart_repository.save_cart(user_id, cart_obj)
+
+    def load_user_cart(self, user_id: str) -> dict:
+        cart = self.cart_repository.get_cart_by_id(user_id)
+        return cart.to_dict() if cart else {}
