@@ -42,3 +42,15 @@ def test_failed_attempts(auth_service):
     auth_service.reset_failed_attempts(email)
     assert auth_service.is_account_locked(email) is False
     assert auth_service.auth_repository.get_user_by_email(email).failed_attempts == 0
+
+def test_password_reset(auth_service):
+    email = "testuser@example.com"
+    auth_service.register_user(email, "SecureP@ss123")
+
+    token = auth_service.create_password_reset_token(email)
+    assert auth_service.validate_password_reset_token(token) is True
+
+    auth_service.update_password(token, "NewSecureP@ss456")
+    assert auth_service.verify_user(email, "NewSecureP@ss456")
+
+    assert auth_service.auth_repository.get_user_by_email(email).reset_token is None
