@@ -8,3 +8,4 @@ class User:
     reset_token_expiry: str = None
     failed_attempts: int = 0
     account_locked: bool = False
+    profile: dict = None
