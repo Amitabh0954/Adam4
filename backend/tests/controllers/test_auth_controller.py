@@ -1,5 +1,5 @@
 import pytest
-from flask import Flask
+from flask import Flask, session
 from backend.app import create_app
 
 @pytest.fixture
@@ -41,3 +41,33 @@ def test_register_user_with_invalid_password(client):
     })
     assert response.status_code == 400
     assert response.get_json() == {"error": "Password does not meet security criteria"}
+
+def test_login_user(client):
+    client.post('/auth/register', json={
+        "email": "testuser@example.com",
+        "password": "SecureP@ss123"
+    })
+    response = client.post('/auth/login', json={
+        "email": "testuser@example.com",
+        "password": "SecureP@ss123"
+    })
+    assert response.status_code == 200
+    assert response.get_json() == {"message": "Logged in successfully"}
+
+def test_login_user_invalid_credentials(client):
+    response = client.post('/auth/login', json={
+        "email": "invalid@example.com",
+        "password": "invalidpassword"
+    })
+    assert response.status_code == 401
+    assert response.get_json() == {"error": "Invalid email or password"}
+
+def test_logout_user(client):
+    with client.session_transaction() as sess:
+        sess['user_id'] = 'user_id'
+
+    response = client.post('/auth/logout')
+    assert response.status_code == 200
+    assert response.get_json() == {"message": "Logged out successfully"}
+    with client.session_transaction() as sess:
+        assert 'user_id' not in sess
