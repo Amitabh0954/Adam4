@@ -73,3 +73,53 @@ def test_remove_from_cart_guest(client):
     })
     assert response.status_code == 200
     assert response.get_json() == {"message": "Product removed from cart successfully"}
+
+def test_total_price_logged_in(client):
+    client.post('/products/add', json={
+        "name": "Product A",
+        "price": 10.0,
+        "description": "Description A",
+        "category": "Category A"
+    })
+    client.post('/products/add', json={
+        "name": "Product B",
+        "price": 20.0,
+        "description": "Description B",
+        "category": "Category B"
+    })
+    client.post('/cart/add', json={
+        "product_id": "Product A",
+        "quantity": 1
+    })
+    client.post('/cart/add', json={
+        "product_id": "Product B",
+        "quantity": 2
+    })
+
+    response = client.get('/cart/view')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert 'total_price' in data
+    assert data['total_price'] == 50.0
+
+def test_total_price_guest(client):
+    with client.session_transaction() as session:
+        session['cart'] = {"product123": 1}
+    
+    response = client.post('/cart/add', json={
+        "product_id": "Product A",
+        "quantity": 2
+    })
+
+    client.post('/products/add', json={
+        "name": "Product A",
+        "price": 10.0,
+        "description": "Description A",
+        "category": "Category A"
+    })
+    
+    response = client.get('/cart/view')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert 'total_price' in data
+    assert data['total_price'] == 20.0
