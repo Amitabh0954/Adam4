@@ -52,9 +52,9 @@ class AuthService:
         user = self.auth_repository.get_user_by_email(email)
         return user.account_locked if user else False
 
-    def get_current_user_id(self) -> str:
-        # Placeholder for the actual implementation to get current user ID
-        return "user_id"
+    def get_current_user_id(self, email: str) -> str:
+        # Simplified to use email as user_id for this implementation
+        return email
 
     def create_password_reset_token(self, email: str) -> str:
         expiry = datetime.datetime.utcnow() + datetime.timedelta(hours=24)
@@ -82,3 +82,11 @@ class AuthService:
             user.password_hash = self.hash_password(new_password)
             self.auth_repository.save_user(user)
             self.auth_repository.clear_reset_token(user.email)
+
+    def get_user_profile(self, user_id: str) -> dict:
+        user = self.auth_repository.get_user_by_user_id(user_id)
+        return user.profile if user else None
+
+    def update_user_profile(self, user_id: str, profile_data: dict) -> dict:
+        self.auth_repository.update_user_profile(user_id, profile_data)
+        return profile_data
