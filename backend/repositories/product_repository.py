@@ -1,0 +1,53 @@
+from typing import Optional, List
+from backend.models.product import Product
+
+class ProductRepository:
+    def __init__(self):
+        self.products = []
+
+    def get_product_by_name(self, name: str) -> Optional[Product]:
+        for product in self.products:
+            if product.name == name:
+                return product
+        return None
+
+    def add_product(self, product: Product) -> None:
+        self.products.append(product)
+
+    def get_all_products(self) -> List[Product]:
+        return self.products
+
+    def update_product(self, name: str, price: Optional[float], description: Optional[str], category_names: list) -> Optional[Product]:
+        product = self.get_product_by_name(name)
+        if product is not None:
+            if price is not None:
+                product.price = price
+            if description is not None:
+                product.description = description
+            if category_names is not None:
+                product.categories = category_names
+        return product
+
+    def delete_product(self, name: str) -> bool:
+        product = self.get_product_by_name(name)
+        if product:
+            self.products.remove(product)
+            return True
+        return False
+
+    def search_products(self, query: str, page: int, per_page: int) -> dict:
+        filtered_products = [
+            product for product in self.products
+            if query.lower() in product.name.lower() or 
+               query.lower() in product.description.lower() or 
+               any(query.lower() in category.lower() for category in product.categories)
+        ]
+        total = len(filtered_products)
+        start = (page - 1) * per_page
+        end = start + per_page
+        return {
+            "total": total,
+            "page": page,
+            "per_page": per_page,
+            "products": [product.to_dict() for product in filtered_products[start:end]]
+        }
