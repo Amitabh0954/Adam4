@@ -15,5 +15,9 @@ class Cart:
         if product_id in self.items:
             del self.items[product_id]
 
+    def update_quantity(self, product_id: str, quantity: int):
+        if product_id in self.items:
+            self.items[product_id] = quantity
+
     def to_dict(self) -> dict:
         return {"items": self.items}
