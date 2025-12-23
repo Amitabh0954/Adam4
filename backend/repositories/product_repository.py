@@ -32,3 +32,20 @@ class ProductRepository:
             self.products.remove(product)
             return True
         return False
+
+    def search_products(self, query: str, page: int, per_page: int) -> dict:
+        filtered_products = [
+            product for product in self.products
+            if query.lower() in product.name.lower() or 
+               query.lower() in product.description.lower() or 
+               query.lower() in product.category.lower()
+        ]
+        total = len(filtered_products)
+        start = (page - 1) * per_page
+        end = start + per_page
+        return {
+            "total": total,
+            "page": page,
+            "per_page": per_page,
+            "products": [product.to_dict() for product in filtered_products[start:end]]
+        }
