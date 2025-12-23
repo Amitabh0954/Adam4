@@ -27,3 +27,11 @@ class CartService:
             cart.remove_item(product_id)
             if persist:
                 self.cart_repository.save_cart(cart_id, cart)
+    
+    def calculate_total(self, cart: dict) -> float:
+        total_price = 0.0
+        for product_id, quantity in cart.get('items', {}).items():
+            product = ProductService().get_product_by_id(product_id)
+            if product:
+                total_price += product.price * quantity
+        return total_price
