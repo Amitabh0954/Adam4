@@ -8,6 +8,12 @@ class AuthRepository:
     def get_user_by_email(self, email: str) -> Optional[User]:
         return self.users.get(email)
 
+    def get_user_by_user_id(self, user_id: str) -> Optional[User]:
+        for user in self.users.values():
+            if user_id == user.email:  # Assuming user_id is the same as email in this simple implementation
+                return user
+        return None
+
     def save_user(self, user: User) -> None:
         self.users[user.email] = user
 
@@ -44,4 +50,10 @@ class AuthRepository:
         if user:
             user.reset_token = None
             user.reset_token_expiry = None
+            self.save_user(user)
+
+    def update_user_profile(self, email: str, profile_data: dict) -> None:
+        user = self.get_user_by_email(email)
+        if user:
+            user.profile = profile_data
             self.save_user(user)
