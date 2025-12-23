@@ -43,12 +43,17 @@ def view_cart():
             return jsonify({"cart": []}), 200
         cart = cart_service.get_guest_cart(cart_id)
 
-    return jsonify(cart), 200
+    total_price = cart_service.calculate_total(cart)
+    return jsonify({"cart": cart, "total_price": total_price}), 200
 
 
 @cart_bp.route('/remove', methods=['POST'])
 def remove_from_cart():
     product_id = request.get_json().get('product_id')
+    confirmation = request.get_json().get('confirm')
+
+    if not confirmation:
+        return jsonify({"error": "Confirmation required to remove product"}), 400
 
     cart_service = CartService()
 
