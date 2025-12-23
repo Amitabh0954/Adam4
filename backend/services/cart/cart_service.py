@@ -1,9 +1,11 @@
 from backend.models.cart import Cart
 from backend.repositories.cart.cart_repository import CartRepository
+from backend.repositories.products.product_repository import ProductRepository
 
 class CartService:
     def __init__(self):
         self.cart_repository = CartRepository()
+        self.product_repository = ProductRepository()
 
     def get_cart(self, user_id: str) -> Cart:
         return self.cart_repository.get_cart(user_id) or Cart(user_id=user_id, items={})
@@ -21,3 +23,8 @@ class CartService:
         if product_id in cart.items:
             del cart.items[product_id]
         self.cart_repository.save_cart(cart)
+
+    def get_total_price(self, user_id: str) -> float:
+        cart = self.get_cart(user_id)
+        product_prices = {product.name: product.price for product in self.product_repository.products}
+        return cart.total_price(product_prices)
