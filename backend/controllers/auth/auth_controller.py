@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from backend.services.auth.auth_service import AuthService
 
 auth_bp = Blueprint('auth', __name__)
@@ -42,7 +42,7 @@ def login():
         return jsonify({"error": "Invalid email or password"}), 401
 
     auth_service.reset_failed_attempts(email)
-    session['user_id'] = auth_service.get_current_user_id()
+    session['user_id'] = auth_service.get_current_user_id(email)
     return jsonify({"message": "Logged in successfully"}), 200
 
 @auth_bp.route('/logout', methods=['POST'])
@@ -86,3 +86,22 @@ def reset_password():
 
     auth_service.update_password(token, new_password)
     return jsonify({"message": "Password reset successfully"}), 200
+
+@auth_bp.route('/profile', methods=['GET', 'PUT'])
+def profile():
+    auth_service = AuthService()
+    user_id = session.get('user_id')
+
+    if not user_id:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if request.method == 'GET':
+        user_profile = auth_service.get_user_profile(user_id)
+        if not user_profile:
+            return jsonify({"error": "User profile not found"}), 404
+        return jsonify(user_profile), 200
+
+    if request.method == 'PUT':
+        data = request.get_json()
+        updated_profile = auth_service.update_user_profile(user_id, data)
+        return jsonify(updated_profile), 200
