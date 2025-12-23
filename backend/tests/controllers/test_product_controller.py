@@ -79,3 +79,54 @@ def test_list_products(client):
     assert products[1]["name"] == "Test Product 2"
     assert products[1]["price"] == 15.99
     assert products[1]["description"] == "Second test product"
+
+def test_update_product(client):
+    client.post('/products/add', json={
+        "name": "Test Product",
+        "price": 10.99,
+        "description": "A test product"
+    })
+
+    response = client.put('/products/update/Test Product', json={
+        "price": 12.99,
+        "description": "An updated test product"
+    })
+    assert response.status_code == 200
+    product = response.get_json()
+    assert product["name"] == "Test Product"
+    assert product["price"] == 12.99
+    assert product["description"] == "An updated test product"
+
+def test_update_product_with_invalid_price(client):
+    client.post('/products/add', json={
+        "name": "Test Product",
+        "price": 10.99,
+        "description": "A test product"
+    })
+
+    response = client.put('/products/update/Test Product', json={
+        "price": "invalid_price"
+    })
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "Price must be a numeric value"}
+
+def test_update_product_with_empty_description(client):
+    client.post('/products/add', json={
+        "name": "Test Product",
+        "price": 10.99,
+        "description": "A test product"
+    })
+
+    response = client.put('/products/update/Test Product', json={
+        "description": ""
+    })
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "Description cannot be empty"}
+
+def test_update_non_existent_product(client):
+    response = client.put('/products/update/Non Existent Product', json={
+        "price": 12.99,
+        "description": "An updated test product"
+    })
+    assert response.status_code == 404
+    assert response.get_json() == {"error": "Product not found"}
