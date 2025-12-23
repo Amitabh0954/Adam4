@@ -25,3 +25,23 @@ class AuthRepository:
             user.failed_attempts = 0
             user.account_locked = False
             self.save_user(user)
+
+    def save_reset_token(self, email: str, token: str, expiry: str) -> None:
+        user = self.get_user_by_email(email)
+        if user:
+            user.reset_token = token
+            user.reset_token_expiry = expiry
+            self.save_user(user)
+
+    def get_user_by_reset_token(self, token: str) -> Optional[User]:
+        for user in self.users.values():
+            if user.reset_token == token:
+                return user
+        return None
+
+    def clear_reset_token(self, email: str) -> None:
+        user = self.get_user_by_email(email)
+        if user:
+            user.reset_token = None
+            user.reset_token_expiry = None
+            self.save_user(user)
