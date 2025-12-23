@@ -23,3 +23,10 @@ def test_remove_product_from_cart(cart_service):
     cart_service.remove_product_from_cart(cart_id, "Test Product", persist=False)
     cart = cart_service.get_guest_cart(cart_id)
     assert "Test Product" not in cart["items"]
+
+def test_calculate_total(cart_service):
+    cart_id = cart_service.generate_guest_cart_id()
+    cart_service.add_product_to_cart(cart_id, "Test Product", 2, persist=False)
+    cart = cart_service.get_guest_cart(cart_id)
+    total_price = cart_service.calculate_total(cart)
+    assert total_price == 21.98
