@@ -37,3 +37,17 @@ def test_calculate_total(cart_service):
     cart = cart_service.get_guest_cart(cart_id)
     total_price = cart_service.calculate_total(cart)
     assert total_price == 21.98
+
+def test_save_user_cart(cart_service):
+    cart_id = "user_123"
+    cart_service.add_product_to_cart(cart_id, "Test Product", 2, persist=False)
+    cart = cart_service.get_guest_cart(cart_id)
+    cart_service.save_user_cart(cart_id, cart)
+    saved_cart = cart_service.get_user_cart(cart_id)
+    assert saved_cart["items"]["Test Product"] == 2
+
+def test_load_user_cart(cart_service):
+    cart_id = "user_123"
+    cart_service.add_product_to_cart(cart_id, "Test Product", 2, persist=True)
+    loaded_cart = cart_service.load_user_cart(cart_id)
+    assert loaded_cart["items"]["Test Product"] == 2
