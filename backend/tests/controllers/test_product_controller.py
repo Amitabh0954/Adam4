@@ -157,3 +157,30 @@ def test_delete_non_existent_product(client):
     response = client.delete('/products/delete/Non Existent Product', query_string={"confirm": "yes"})
     assert response.status_code == 404
     assert response.get_json() == {"error": "Product not found"}
+
+def test_search_products(client):
+    client.post('/products/add', json={
+        "name": "Test Product 1",
+        "price": 10.99,
+        "description": "First test product",
+        "category": "Category A"
+    })
+    client.post('/products/add', json={
+        "name": "Test Product 2",
+        "price": 15.99,
+        "description": "Second test product",
+        "category": "Category B"
+    })
+
+    response = client.get('/products/search', query_string={"query": "Category", "page": 1, "per_page": 1})
+    assert response.status_code == 200
+    search_results = response.get_json()
+    assert search_results["total"] == 2
+    assert len(search_results["products"]) == 1
+    assert search_results["products"][0]["name"] == "Test Product 1"
+
+    response = client.get('/products/search', query_string={"query": "Second", "page": 1, "per_page": 10})
+    assert response.status_code == 200
+    search_results = response.get_json()
+    assert search_results["total"] == 1
+    assert search_results["products"][0]["name"] == "Test Product 2"
