@@ -21,3 +21,16 @@ def register():
     user_service.create_user(email, password)
 
     return jsonify({"message": "User registered successfully"}), 201
+
+@user_bp.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+
+    user_service = UserService()
+
+    if user_service.authenticate_user(email, password):
+        return jsonify({"message": "Login successful"}), 200
+
+    return jsonify({"error": "Invalid email or password"}), 401
