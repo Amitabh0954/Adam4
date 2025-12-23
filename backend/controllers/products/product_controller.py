@@ -48,3 +48,17 @@ def update_product():
     product_service.update_product_details(name, price, description, category)
 
     return jsonify({"message": "Product updated successfully"}), 200
+
+@product_bp.route('/delete', methods=['DELETE'])
+def delete_product():
+    data = request.get_json()
+    name = data.get('name')
+
+    product_service = ProductService()
+
+    if not product_service.is_name_taken(name):
+        return jsonify({"error": "Product not found"}), 404
+
+    product_service.delete_product(name)
+
+    return jsonify({"message": "Product deleted successfully"}), 200
