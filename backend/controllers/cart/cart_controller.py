@@ -71,6 +71,7 @@ def remove_from_cart():
 
     return jsonify({"message": "Product removed from cart successfully"}), 200
 
+
 @cart_bp.route('/update', methods=['POST'])
 def update_cart():
     product_id = request.get_json().get('product_id')
@@ -92,3 +93,36 @@ def update_cart():
 
     total_price = cart_service.calculate_total(cart_service.get_user_cart(user_id) if 'user_id' in session else cart_service.get_guest_cart(cart_id))
     return jsonify({"message": "Cart updated successfully", "total_price": total_price}), 200
+
+
+@cart_bp.route('/save', methods=['POST'])
+def save_cart():
+    if 'user_id' not in session:
+        return jsonify({"error": "User must be logged in to save cart"}), 401
+
+    user_id = session['user_id']
+    cart_service = CartService()
+    cart = cart_service.get_user_cart(user_id)
+
+    if not cart:
+        return jsonify({"error": "No cart found to save"}), 404
+
+    cart_service.save_user_cart(user_id, cart)
+
+    return jsonify({"message": "Cart saved successfully"}), 200
+
+
+@cart_bp.route('/load', methods=['GET'])
+def load_cart():
+    if 'user_id' not in session:
+        return jsonify({"error": "User must be logged in to load cart"}), 401
+
+    user_id = session['user_id']
+    cart_service = CartService()
+    cart = cart_service.load_user_cart(user_id)
+
+    if not cart:
+        return jsonify({"error": "No saved cart found"}), 404
+
+    total_price = cart_service.calculate_total(cart)
+    return jsonify({"cart": cart, "total_price": total_price}), 200
