@@ -49,3 +49,16 @@ def update_product(name):
         return jsonify({"error": "Product not found"}), 404
 
     return jsonify(product.to_dict()), 200
+
+@product_bp.route('/delete/<string:name>', methods=['DELETE'])
+def delete_product(name):
+    product_service = ProductService()
+    confirmation = request.args.get('confirm')
+
+    if confirmation != 'yes':
+        return jsonify({"error": "Confirmation required to delete product"}), 400
+
+    if product_service.delete_product(name):
+        return jsonify({"message": "Product deleted successfully"}), 200
+
+    return jsonify({"error": "Product not found"}), 404
