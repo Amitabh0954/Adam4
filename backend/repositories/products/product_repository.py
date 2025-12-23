@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional, Tuple
 from backend.models.product import Product
 
 class ProductRepository:
@@ -22,3 +22,10 @@ class ProductRepository:
 
     def delete_product(self, name: str) -> None:
         self.products = [product for product in self.products if product.name != name]
+
+    def search_products(self, query: str, page: int, per_page: int) -> Tuple[List[Product], int]:
+        matching_products = [product for product in self.products if query.lower() in product.name.lower() or query.lower() in product.category.lower()]
+        total = len(matching_products)
+        start = (page - 1) * per_page
+        end = start + per_page
+        return matching_products[start:end], total
