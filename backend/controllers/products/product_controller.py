@@ -62,3 +62,19 @@ def delete_product():
     product_service.delete_product(name)
 
     return jsonify({"message": "Product deleted successfully"}), 200
+
+@product_bp.route('/search', methods=['GET'])
+def search_products():
+    query = request.args.get('query', '')
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 10))
+
+    product_service = ProductService()
+    results, total = product_service.search_products(query, page, per_page)
+
+    return jsonify({
+        "results": results,
+        "total": total,
+        "page": page,
+        "per_page": per_page
+    }), 200
