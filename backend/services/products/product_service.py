@@ -1,3 +1,4 @@
+from typing import List, Tuple
 from backend.models.product import Product
 from backend.repositories.products.product_repository import ProductRepository
 
@@ -26,3 +27,6 @@ class ProductService:
 
     def delete_product(self, name: str) -> None:
         self.product_repository.delete_product(name)
+    
+    def search_products(self, query: str, page: int, per_page: int) -> Tuple[List[Product], int]:
+        return self.product_repository.search_products(query, page, per_page)
