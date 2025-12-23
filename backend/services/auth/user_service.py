@@ -1,6 +1,7 @@
 import re
 import secrets
 import datetime
+from typing import Dict
 from backend.models.user import User
 from backend.repositories.auth.user_repository import UserRepository
 
@@ -54,3 +55,16 @@ class UserService:
             return f"https://example.com/reset_password?token={reset_token}"
 
         return ""
+
+    def update_user_profile(self, email: str, new_data: Dict[str, Optional[str]]) -> Dict[str, Optional[str]]:
+        user = self.user_repository.get_user_by_email(email)
+        if user:
+            user.name = new_data.get("name")
+            user.phone = new_data.get("phone")
+            self.user_repository.update_user(user)
+            return {
+                "email": user.email,
+                "name": user.name,
+                "phone": user.phone
+            }
+        return {}
