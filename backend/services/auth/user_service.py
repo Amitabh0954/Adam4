@@ -1,4 +1,6 @@
 import re
+import secrets
+import datetime
 from backend.models.user import User
 from backend.repositories.auth.user_repository import UserRepository
 
@@ -40,3 +42,15 @@ class UserService:
             # you can implement further actions like temporary lock on account
             return False
         return False
+    
+    def generate_reset_link(self, email: str) -> str:
+        user = self.user_repository.get_user_by_email(email)
+        if user:
+            reset_token = secrets.token_urlsafe(32)
+            reset_token_expiry = datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+            user.reset_token = reset_token
+            user.reset_token_expiry = reset_token_expiry
+            self.user_repository.update_user(user)
+            return f"https://example.com/reset_password?token={reset_token}"
+
+        return ""
