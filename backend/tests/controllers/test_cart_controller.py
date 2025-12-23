@@ -78,3 +78,33 @@ def test_remove_from_cart_without_confirmation(client):
     response = client.post('/cart/remove', json={"product_id": "Test Product"})
     assert response.status_code == 400
     assert response.get_json() == {"error": "Confirmation required to remove product"}
+
+def test_update_cart(client):
+    client.post('/products/add', json={
+        "name": "Test Product",
+        "price": 10.99,
+        "description": "A test product"
+    })
+    client.post('/cart/add', json={
+        "product_id": "Test Product",
+        "quantity": 2
+    })
+    response = client.post('/cart/update', json={"product_id": "Test Product", "quantity": 5})
+    assert response.status_code == 200
+    assert response.get_json()["message"] == "Cart updated successfully"
+    total_price = response.get_json()["total_price"]
+    assert total_price == 54.95
+
+def test_update_cart_with_invalid_quantity(client):
+    client.post('/products/add', json={
+        "name": "Test Product",
+        "price": 10.99,
+        "description": "A test product"
+    })
+    client.post('/cart/add', json={
+        "product_id": "Test Product",
+        "quantity": 2
+    })
+    response = client.post('/cart/update', json={"product_id": "Test Product", "quantity": -5})
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "Quantity must be a positive integer"}
