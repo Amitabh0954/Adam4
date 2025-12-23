@@ -1,11 +1,14 @@
 import hashlib
 import re
+import jwt
+import datetime
 from backend.models.user import User
 from backend.repositories.auth_repository import AuthRepository
 
 class AuthService:
     def __init__(self):
         self.auth_repository = AuthRepository()
+        self.jwt_secret = "your_secret_key"
 
     def is_email_taken(self, email: str) -> bool:
         return self.auth_repository.get_user_by_email(email) is not None
@@ -52,3 +55,30 @@ class AuthService:
     def get_current_user_id(self) -> str:
         # Placeholder for the actual implementation to get current user ID
         return "user_id"
+
+    def create_password_reset_token(self, email: str) -> str:
+        expiry = datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+        token = jwt.encode({'email': email, 'exp': expiry}, self.jwt_secret, algorithm='HS256')
+        self.auth_repository.save_reset_token(email, token, expiry.isoformat())
+        return token
+
+    def validate_password_reset_token(self, token: str) -> bool:
+        try:
+            jwt.decode(token, self.jwt_secret, algorithms=['HS256'])
+            user = self.auth_repository.get_user_by_reset_token(token)
+            if not user or datetime.datetime.fromisoformat(user.reset_token_expiry) < datetime.datetime.utcnow():
+                return False
+            return True
+        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+            return False
+
+    def send_password_reset_email(self, email: str, token: str) -> None:
+        # Placeholder for email sending logic
+        pass
+
+    def update_password(self, token: str, new_password: str) -> None:
+        user = self.auth_repository.get_user_by_reset_token(token)
+        if user and self.validate_password_reset_token(token):
+            user.password_hash = self.hash_password(new_password)
+            self.auth_repository.save_user(user)
+            self.auth_repository.clear_reset_token(user.email)
