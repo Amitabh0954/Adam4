@@ -18,3 +18,6 @@ class ProductService:
 
     def update_product(self, name: str, price: Optional[float], description: Optional[str]) -> Optional[Product]:
         return self.product_repository.update_product(name, price, description)
+
+    def delete_product(self, name: str) -> bool:
+        return self.product_repository.delete_product(name)
