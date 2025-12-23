@@ -40,9 +40,11 @@ def test_view_cart(client):
     })
     response = client.get('/cart/view')
     assert response.status_code == 200
-    cart = response.get_json()
+    cart = response.get_json()["cart"]
     assert "Test Product" in cart["items"]
     assert cart["items"]["Test Product"] == 2
+    total_price = response.get_json()["total_price"]
+    assert total_price == 21.98
 
 def test_remove_from_cart(client):
     client.post('/products/add', json={
@@ -54,11 +56,25 @@ def test_remove_from_cart(client):
         "product_id": "Test Product",
         "quantity": 2
     })
-    response = client.post('/cart/remove', json={"product_id": "Test Product"})
+    response = client.post('/cart/remove', json={"product_id": "Test Product", "confirm": True})
     assert response.status_code == 200
     assert response.get_json() == {"message": "Product removed from cart successfully"}
     response = client.get('/cart/view')
     assert response.status_code == 200
-    cart = response.get_json()
+    cart = response.get_json()["cart"]
     assert "items" in cart
     assert "Test Product" not in cart["items"]
+
+def test_remove_from_cart_without_confirmation(client):
+    client.post('/products/add', json={
+        "name": "Test Product",
+        "price": 10.99,
+        "description": "A test product"
+    })
+    client.post('/cart/add', json={
+        "product_id": "Test Product",
+        "quantity": 2
+    })
+    response = client.post('/cart/remove', json={"product_id": "Test Product"})
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "Confirmation required to remove product"}
