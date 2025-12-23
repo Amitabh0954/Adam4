@@ -25,7 +25,30 @@ class AuthService:
     def hash_password(self, password: str) -> str:
         return hashlib.sha256(password.encode()).hexdigest()
 
+    def verify_password(self, password: str, hashed_password: str) -> bool:
+        return self.hash_password(password) == hashed_password
+
     def register_user(self, email: str, password: str) -> None:
         password_hash = self.hash_password(password)
         user = User(email=email, password_hash=password_hash)
         self.auth_repository.save_user(user)
+
+    def verify_user(self, email: str, password: str) -> bool:
+        user = self.auth_repository.get_user_by_email(email)
+        if not user:
+            return False
+        return self.verify_password(password, user.password_hash)
+
+    def increment_failed_attempt(self, email: str) -> None:
+        self.auth_repository.increment_failed_attempt(email)
+
+    def reset_failed_attempts(self, email: str) -> None:
+        self.auth_repository.reset_failed_attempts(email)
+
+    def is_account_locked(self, email: str) -> bool:
+        user = self.auth_repository.get_user_by_email(email)
+        return user.account_locked if user else False
+
+    def get_current_user_id(self) -> str:
+        # Placeholder for the actual implementation to get current user ID
+        return "user_id"
