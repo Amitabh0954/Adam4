@@ -130,3 +130,30 @@ def test_update_non_existent_product(client):
     })
     assert response.status_code == 404
     assert response.get_json() == {"error": "Product not found"}
+
+def test_delete_product(client):
+    client.post('/products/add', json={
+        "name": "Test Product",
+        "price": 10.99,
+        "description": "A test product"
+    })
+
+    response = client.delete('/products/delete/Test Product', query_string={"confirm": "yes"})
+    assert response.status_code == 200
+    assert response.get_json() == {"message": "Product deleted successfully"}
+
+def test_delete_product_without_confirmation(client):
+    client.post('/products/add', json={
+        "name": "Test Product",
+        "price": 10.99,
+        "description": "A test product"
+    })
+
+    response = client.delete('/products/delete/Test Product')
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "Confirmation required to delete product"}
+
+def test_delete_non_existent_product(client):
+    response = client.delete('/products/delete/Non Existent Product', query_string={"confirm": "yes"})
+    assert response.status_code == 404
+    assert response.get_json() == {"error": "Product not found"}
