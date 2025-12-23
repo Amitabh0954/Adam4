@@ -24,7 +24,12 @@ class CartService:
             del cart.items[product_id]
         self.cart_repository.save_cart(cart)
 
-    def get_total_price(self, user_id: str) -> float:
+    def update_product_quantity_in_cart(self, user_id: str, product_id: str, quantity: int) -> None:
         cart = self.get_cart(user_id)
+        if product_id in cart.items:
+            cart.items[product_id] = quantity
+        self.cart_repository.save_cart(cart)
+
+    def calculate_cart_total(self, items: Dict[str, int]) -> float:
         product_prices = {product.name: product.price for product in self.product_repository.products}
-        return cart.total_price(product_prices)
+        return sum(quantity * product_prices[product_id] for product_id, quantity in items.items())
