@@ -8,8 +8,8 @@ class ProductService:
     def is_product_name_taken(self, name: str) -> bool:
         return self.product_repository.get_product_by_name(name) is not None
 
-    def add_product(self, name: str, price: float, description: str) -> Product:
-        product = Product(name=name, price=price, description=description)
+    def add_product(self, name: str, price: float, description: str, category: str = "") -> Product:
+        product = Product(name=name, price=price, description=description, category=category)
         self.product_repository.add_product(product)
         return product
 
@@ -21,3 +21,6 @@ class ProductService:
 
     def delete_product(self, name: str) -> bool:
         return self.product_repository.delete_product(name)
+
+    def search_products(self, query: str, page: int, per_page: int) -> dict:
+        return self.product_repository.search_products(query, page, per_page)
