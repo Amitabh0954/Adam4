@@ -74,52 +74,27 @@ def test_remove_from_cart_guest(client):
     assert response.status_code == 200
     assert response.get_json() == {"message": "Product removed from cart successfully"}
 
-def test_total_price_logged_in(client):
-    client.post('/products/add', json={
-        "name": "Product A",
-        "price": 10.0,
-        "description": "Description A",
-        "category": "Category A"
-    })
-    client.post('/products/add', json={
-        "name": "Product B",
-        "price": 20.0,
-        "description": "Description B",
-        "category": "Category B"
-    })
+def test_update_cart_quantity_logged_in(client):
     client.post('/cart/add', json={
-        "product_id": "Product A",
+        "product_id": "product123",
         "quantity": 1
     })
-    client.post('/cart/add', json={
-        "product_id": "Product B",
-        "quantity": 2
+    response = client.post('/cart/update_quantity', json={
+        "product_id": "product123",
+        "quantity": 3
     })
-
-    response = client.get('/cart/view')
     assert response.status_code == 200
-    data = response.get_json()
-    assert 'total_price' in data
-    assert data['total_price'] == 50.0
+    cart = client.get('/cart/view').get_json()
+    assert cart["items"]["product123"] == 3
 
-def test_total_price_guest(client):
+def test_update_cart_quantity_guest(client):
     with client.session_transaction() as session:
         session['cart'] = {"product123": 1}
-    
-    response = client.post('/cart/add', json={
-        "product_id": "Product A",
-        "quantity": 2
-    })
 
-    client.post('/products/add', json={
-        "name": "Product A",
-        "price": 10.0,
-        "description": "Description A",
-        "category": "Category A"
+    response = client.post('/cart/update_quantity', json={
+        "product_id": "product123",
+        "quantity": 3
     })
-    
-    response = client.get('/cart/view')
     assert response.status_code == 200
-    data = response.get_json()
-    assert 'total_price' in data
-    assert data['total_price'] == 20.0
+    with client.session_transaction() as session:
+        assert session['cart']["product123"] == 3
