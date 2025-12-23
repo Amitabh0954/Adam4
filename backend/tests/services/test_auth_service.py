@@ -1,3 +1,4 @@
+```python
 import pytest
 from backend.services.auth.auth_service import AuthService
 
@@ -54,3 +55,33 @@ def test_password_reset(auth_service):
     assert auth_service.verify_user(email, "NewSecureP@ss456")
 
     assert auth_service.auth_repository.get_user_by_email(email).reset_token is None
+
+def test_update_profile(auth_service):
+    email = "testuser@example.com"
+    auth_service.register_user(email, "SecureP@ss123")
+
+    profile_data = {
+        "first_name": "Test",
+        "last_name": "User",
+        "preferences": {
+            "newsletter": True
+        }
+    }
+    updated_profile = auth_service.update_user_profile(email, profile_data)
+    assert updated_profile == profile_data
+
+    user = auth_service.auth_repository.get_user_by_email(email)
+    assert user.profile == profile_data
+
+def test_get_profile(auth_service):
+    email = "testuser@example.com"
+    auth_service.register_user(email, "SecureP@ss123")
+
+    profile_data = {
+        "first_name": "Test",
+        "last_name": "User",
+        "preferences": {
+            "newsletter": True
+        }
+    }
+    auth_service.update_user_profile(email, profile_data)
