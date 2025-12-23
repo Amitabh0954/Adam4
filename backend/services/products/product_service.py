@@ -17,3 +17,9 @@ class ProductService:
     def add_new_product(self, name: str, price: float, description: str, category: str) -> None:
         product = Product(name=name, price=price, description=description, category=category)
         self.product_repository.add_product(product)
+
+    def update_product_details(self, name: str, price: float, description: str, category: str) -> None:
+        existing_product = self.product_repository.get_product_by_name(name)
+        if existing_product:
+            updated_product = Product(name=name, price=price, description=description, category=category)
+            self.product_repository.update_product(updated_product)
