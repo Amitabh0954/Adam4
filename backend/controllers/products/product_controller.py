@@ -29,3 +29,23 @@ def list_products():
     product_service = ProductService()
     products = product_service.get_all_products()
     return jsonify([product.to_dict() for product in products]), 200
+
+@product_bp.route('/update/<string:name>', methods=['PUT'])
+def update_product(name):
+    data = request.get_json()
+    price = data.get('price')
+    description = data.get('description')
+
+    if price is not None and not isinstance(price, (int, float)):
+        return jsonify({"error": "Price must be a numeric value"}), 400
+
+    if description == "":
+        return jsonify({"error": "Description cannot be empty"}), 400
+
+    product_service = ProductService()
+    product = product_service.update_product(name, price, description)
+
+    if not product:
+        return jsonify({"error": "Product not found"}), 404
+
+    return jsonify(product.to_dict()), 200
