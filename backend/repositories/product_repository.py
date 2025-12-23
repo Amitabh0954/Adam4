@@ -25,3 +25,10 @@ class ProductRepository:
             if description is not None:
                 product.description = description
         return product
+
+    def delete_product(self, name: str) -> bool:
+        product = self.get_product_by_name(name)
+        if product:
+            self.products.remove(product)
+            return True
+        return False
