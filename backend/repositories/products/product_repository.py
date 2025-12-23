@@ -1,9 +1,11 @@
 from typing import List, Optional, Tuple
 from backend.models.product import Product
+from backend.models.category import Category
 
 class ProductRepository:
     def __init__(self):
         self.products = []
+        self.categories = []
 
     def add_product(self, product: Product) -> None:
         self.products.append(product)
@@ -29,3 +31,15 @@ class ProductRepository:
         start = (page - 1) * per_page
         end = start + per_page
         return matching_products[start:end], total
+
+    def add_category(self, category: Category) -> None:
+        self.categories.append(category)
+
+    def get_category_by_name(self, name: str) -> Optional[Category]:
+        for category in self.categories:
+            if category.name == name:
+                return category
+        return None
+
+    def get_all_categories(self) -> List[Category]:
+        return self.categories
