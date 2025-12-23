@@ -28,3 +28,14 @@ def test_get_all_products(product_service):
     assert products[1].name == "Test Product 2"
     assert products[1].price == 15.99
     assert products[1].description == "Second test product"
+
+def test_update_product(product_service):
+    product_service.add_product("Test Product", 10.99, "A test product")
+    updated_product = product_service.update_product("Test Product", 12.99, "An updated test product")
+    assert updated_product is not None
+    assert updated_product.price == 12.99
+    assert updated_product.description == "An updated test product"
+
+def test_update_non_existent_product(product_service):
+    updated_product = product_service.update_product("Non Existent Product", 12.99, "An updated test product")
+    assert updated_product is None
