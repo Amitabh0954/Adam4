@@ -1,16 +1,16 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 @dataclass
 class Product:
     name: str
     price: float
     description: str
-    category: str = ""
+    categories: list = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return {
             "name": self.name,
             "price": self.price,
             "description": self.description,
-            "category": self.category
+            "categories": self.categories
         }
