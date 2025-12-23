@@ -71,3 +71,35 @@ def test_logout_user(client):
     assert response.get_json() == {"message": "Logged out successfully"}
     with client.session_transaction() as sess:
         assert 'user_id' not in sess
+
+def test_request_password_reset(client):
+    client.post('/auth/register', json={
+        "email": "testuser@example.com",
+        "password": "SecureP@ss123"
+    })
+    response = client.post('/auth/request_password_reset', json={
+        "email": "testuser@example.com"
+    })
+    assert response.status_code == 200
+    assert response.get_json() == {"message": "Password reset email sent"}
+
+def test_reset_password(client):
+    client.post('/auth/register', json={
+        "email": "testuser@example.com",
+        "password": "SecureP@ss123"
+    })
+    client.post('/auth/request_password_reset', json={
+        "email": "testuser@example.com"
+    })
+    auth_service = AuthService()
+    user = auth_service.auth_repository.get_user_by_email("testuser@example.com")
+    token = user.reset_token
+
+    response = client.post('/auth/reset_password', json={
+        "token": token,
+        "new_password": "NewSecureP@ss456"
+    })
+    assert response.status_code == 200
+    assert response.get_json() == {"message": "Password reset successfully"}
+
+    assert auth_service.verify_user("testuser@example.com", "NewSecureP@ss456")
