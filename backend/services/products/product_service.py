@@ -1,5 +1,6 @@
 from typing import List, Tuple
 from backend.models.product import Product
+from backend.models.category import Category
 from backend.repositories.products.product_repository import ProductRepository
 
 class ProductService:
@@ -30,3 +31,13 @@ class ProductService:
     
     def search_products(self, query: str, page: int, per_page: int) -> Tuple[List[Product], int]:
         return self.product_repository.search_products(query, page, per_page)
+    
+    def add_category(self, name: str, parent: Optional[str] = None) -> None:
+        category = Category(name=name, parent=parent)
+        parent_category = self.product_repository.get_category_by_name(parent) if parent else None
+        if parent_category:
+            parent_category.children.append(name)
+        self.product_repository.add_category(category)
+
+    def get_all_categories(self) -> List[Category]:
+        return self.product_repository.get_all_categories()
