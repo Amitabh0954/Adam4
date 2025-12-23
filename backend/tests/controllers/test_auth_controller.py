@@ -103,3 +103,53 @@ def test_reset_password(client):
     assert response.get_json() == {"message": "Password reset successfully"}
 
     assert auth_service.verify_user("testuser@example.com", "NewSecureP@ss456")
+
+def test_get_profile(client):
+    client.post('/auth/register', json={
+        "email": "testuser@example.com",
+        "password": "SecureP@ss123"
+    })
+    client.post('/auth/login', json={
+        "email": "testuser@example.com",
+        "password": "SecureP@ss123"
+    })
+
+    response = client.get('/auth/profile')
+    assert response.status_code == 200
+    assert response.get_json() == {}
+
+def test_update_profile(client):
+    client.post('/auth/register', json={
+        "email": "testuser@example.com",
+        "password": "SecureP@ss123"
+    })
+    client.post('/auth/login', json={
+        "email": "testuser@example.com",
+        "password": "SecureP@ss123"
+    })
+
+    response = client.put('/auth/profile', json={
+        "first_name": "Test",
+        "last_name": "User",
+        "preferences": {
+            "newsletter": True
+        }
+    })
+    assert response.status_code == 200
+    assert response.get_json() == {
+        "first_name": "Test",
+        "last_name": "User",
+        "preferences": {
+            "newsletter": True
+        }
+    }
+
+    response = client.get('/auth/profile')
+    assert response.status_code == 200
+    assert response.get_json() == {
+        "first_name": "Test",
+        "last_name": "User",
+        "preferences": {
+            "newsletter": True
+        }
+    }
