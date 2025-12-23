@@ -23,3 +23,6 @@ class ProductService:
         if existing_product:
             updated_product = Product(name=name, price=price, description=description, category=category)
             self.product_repository.update_product(updated_product)
+
+    def delete_product(self, name: str) -> None:
+        self.product_repository.delete_product(name)
