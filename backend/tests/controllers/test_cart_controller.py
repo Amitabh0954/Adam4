@@ -9,7 +9,7 @@ from backend.config.database import get_db
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from backend.models.catalog.product import Product
-from backend.models.cart.shopping_cart import ShoppingCart
+from backend.models.cart.shopping_cart import ShoppingCart, CartItem
 from backend.models.base import Base
 
 DATABASE_URL = "sqlite:///./test.db"
@@ -65,4 +65,30 @@ def test_remove_product_from_cart():
     assert response.status_code == 200
     data = response.json()
     assert data["message"] == "Product removed from cart"
+
+def test_modify_product_quantity():
+    db = TestingSessionLocal()
+    product = create_test_product(db)
+    
+    cart = ShoppingCart(user_id=1)
+    db.add(cart)
+    db.commit()
+    db.refresh(cart)
+    
+    cart_item = CartItem(cart_id=cart.id, product_id=product.id, quantity=1)
+    db.add(cart_item)
+    db.commit()
+    db.refresh(cart_item)
+    
+    response = client.post("/cart/modify_quantity", json={"product_id": product.id, "user_id": 1, "quantity": 5})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["message"] == "Product quantity updated"
+    assert data["quantity"] == 5
+
+def test_modify_product_quantity_invalid():
+    response = client.post("/cart/modify_quantity", json={"product_id": 1, "user_id": 1, "quantity": 0})
+    assert response.status_code == 400
+    data = response.json()
+    assert data["detail"] == "Quantity must be a positive integer"
 ```
