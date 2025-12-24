@@ -34,4 +34,16 @@ def remove_product_from_cart(product_id: int, user_id: int, db: Session = Depend
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
     return {"message": "Product removed from cart"}
+
+@router.post("/cart/modify_quantity", response_model=dict)
+def modify_product_quantity(product_id: int, user_id: int, quantity: int, db: Session = Depends(get_db)):
+    cart_repository = CartRepository(db)
+    cart_service = CartService(cart_repository)
+
+    try:
+        cart_service.modify_product_quantity(user_id, product_id, quantity)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+    return {"message": "Product quantity updated", "product_id": product_id, "quantity": quantity}
 ```
