@@ -91,4 +91,27 @@ def test_modify_product_quantity_invalid():
     assert response.status_code == 400
     data = response.json()
     assert data["detail"] == "Quantity must be a positive integer"
+
+def test_get_cart():
+    db = TestingSessionLocal()
+    product = create_test_product(db)
+    
+    cart = ShoppingCart(user_id=1)
+    db.add(cart)
+    db.commit()
+    db.refresh(cart)
+    
+    cart_item = CartItem(cart_id=cart.id, product_id=product.id, quantity=1)
+    db.add(cart_item)
+    db.commit()
+    db.refresh(cart_item)
+
+    response = client.get("/cart", params={"user_id": 1})
+    assert response.status_code == 200
+    data = response.json()
+    assert "cart" in data
+    assert data["cart"]["cart_id"] == cart.id
+    assert len(data["cart"]["items"]) == 1
+    assert data["cart"]["items"][0]["product_id"] == product.id
+    assert data["cart"]["items"][0]["quantity"] == 1
 ```
