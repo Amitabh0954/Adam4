@@ -22,4 +22,14 @@ class CartService:
             raise ValueError("Cart not found")
 
         self.cart_repository.remove_product_from_cart(cart, product_id)
+
+    def modify_product_quantity(self, user_id: int, product_id: int, quantity: int):
+        cart = self.cart_repository.get_cart_by_user_id(user_id)
+        if not cart:
+            raise ValueError("Cart not found")
+        
+        if quantity <= 0:
+            raise ValueError("Quantity must be a positive integer")
+
+        self.cart_repository.modify_product_quantity(cart, product_id, quantity)
 ```
