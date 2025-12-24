@@ -37,4 +37,14 @@ class CartRepository:
 
     def get_cart_items(self, cart_id: int) -> List[CartItem]:
         return self.db.query(CartItem).filter(CartItem.cart_id == cart_id).all()
+
+    def modify_product_quantity(self, cart: ShoppingCart, product_id: int, quantity: int):
+        cart_item = self.db.query(CartItem).filter(CartItem.cart_id == cart.id, CartItem.product_id == product_id).first()
+        if not cart_item:
+            raise ValueError("Product not found in cart")
+
+        cart_item.quantity = quantity
+        self.db.commit()
+        self.db.refresh(cart_item)
+        return cart_item
 ```
